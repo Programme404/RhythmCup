@@ -859,11 +859,11 @@
             <div class="group-title">三层与击杀</div>
             <div class="check-grid">
               <label class="check-pill">
-                <input type="checkbox" data-group="combat" data-score="100" data-label="通过三层BOSS战">
+                <input id="bossThree" type="checkbox" data-group="combat" data-score="100" data-label="通过三层BOSS战">
                 <span>通过三层BOSS战 <small>+100</small></span>
               </label>
               <label class="check-pill">
-                <input type="checkbox" data-group="combat" data-score="50" data-label="光荣远征中未能获得赤金">
+                <input id="expeditionGold" type="checkbox" data-group="combat" data-score="50" data-label="光荣远征中未能获得赤金">
                 <span>光荣远征未获赤金 <small>额外 +50</small></span>
               </label>
             </div>
@@ -1000,7 +1000,7 @@
               </label>
               <label class="check-pill">
                 <input id="fullHunt" type="checkbox">
-                <span>全追猎（含 3/5 层 Boss） <small>合规要求</small></span>
+                <span>全追猎（含 3/5 层 Boss） <small>抗压位</small></span>
               </label>
             </div>
             <p class="note">普通位结算时至少携带一个沙盘；抗压位结算时应携带双沙盘与三个削弱藏，未按要求携带则本局分数无效。</p>
@@ -1354,6 +1354,7 @@
         select.selectedIndex = 0;
       });
       syncRequirementPills();
+      syncExpeditionPill();
       calculate();
     }
 
@@ -1405,6 +1406,9 @@
     const sandboxOne = document.getElementById("sandboxOne");
     const sandboxDouble = document.getElementById("sandboxDouble");
     const weakenThree = document.getElementById("weakenThree");
+    const fullHunt = document.getElementById("fullHunt");
+    const bossThree = document.getElementById("bossThree");
+    const expeditionGold = document.getElementById("expeditionGold");
 
     function isPressureRole() {
       const role = document.querySelector('input[name="role"]:checked');
@@ -1416,12 +1420,19 @@
       sandboxOne.disabled = pressure;
       sandboxDouble.disabled = !pressure;
       weakenThree.disabled = !pressure;
+      fullHunt.disabled = !pressure;
       if (pressure) {
         sandboxOne.checked = false;
       } else {
         sandboxDouble.checked = false;
         weakenThree.checked = false;
+        fullHunt.checked = false;
       }
+    }
+
+    function syncExpeditionPill() {
+      expeditionGold.disabled = !bossThree.checked;
+      if (!bossThree.checked) expeditionGold.checked = false;
     }
 
     roleInputs.forEach((input) => input.addEventListener("change", () => {
@@ -1429,7 +1440,13 @@
       calculate();
     }));
 
+    bossThree.addEventListener("change", () => {
+      syncExpeditionPill();
+      calculate();
+    });
+
     syncRequirementPills();
+    syncExpeditionPill();
     renderTimer();
     calculate();
   </script>
