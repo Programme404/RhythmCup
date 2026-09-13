@@ -767,6 +767,10 @@
       .check-grid {
         grid-template-columns: 1fr;
       }
+
+      .member-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
     }
 
     .team-total {
@@ -789,6 +793,23 @@
     .detail-list li.note-item span {
       color: var(--rose);
     }
+
+    .member-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .member-grid .check-pill span {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 3px;
+    }
+
+    .member-grid .check-pill small {
+      font-size: 19px;
+      line-height: 1.1;
+    }
   </style>
 </head>
 <body>
@@ -800,7 +821,7 @@
         <p class="subtitle">！！！打完不要退出结算界面！！！</p>
       </div>
       <div class="header-score">
-        <span>个人最终得分</span>
+        <span>团队总分</span>
         <strong id="heroTotal">0</strong>
       </div>
     </div>
@@ -812,12 +833,99 @@
       <div class="actions">
         <button class="btn primary" id="calcBtn" type="button">计算分数</button>
         <button class="btn" id="copyBtn" type="button">复制明细</button>
-        <button class="btn" id="resetBtn" type="button">清空</button>
+        <button class="btn" id="clearMemberBtn" type="button">清空当前</button>
+        <button class="btn" id="clearTeamBtn" type="button">清空全队</button>
       </div>
     </div>
 
     <div class="layout">
       <div class="sections">
+        <section>
+          <div class="section-head">
+            <h2>位置、队伍与决赛</h2>
+            <span>队员切换、藏品要求、限时与全队项</span>
+          </div>
+          <div class="section-body">
+            <div class="group-title">参赛位置（四名队员数据独立保存）</div>
+            <div class="member-grid">
+              <label class="check-pill">
+                <input type="radio" name="member" value="0" checked>
+                <span>普通位① <small id="memberChip1">0</small></span>
+              </label>
+              <label class="check-pill">
+                <input type="radio" name="member" value="1">
+                <span>普通位② <small id="memberChip2">0</small></span>
+              </label>
+              <label class="check-pill">
+                <input type="radio" name="member" value="2">
+                <span>普通位③ <small id="memberChip3">0</small></span>
+              </label>
+              <label class="check-pill">
+                <input type="radio" name="member" value="3">
+                <span>抗压位 ×1.3 <small id="memberChip4">0</small></span>
+              </label>
+            </div>
+            <p class="note">每队 3 名普通位与 1 名抗压位；点击队员即可切换，各队员已填写的数据会保留，卡片上的数字为其个人得分。抗压位强制全追猎，最终得分在个人分基础上 ×1.3。</p>
+
+            <div class="group-title">藏品要求（未满足则本局分数无效）</div>
+            <div class="check-grid">
+              <label class="check-pill">
+                <input id="sandboxOne" type="checkbox">
+                <span>至少携带一个沙盘 <small>普通位</small></span>
+              </label>
+              <label class="check-pill">
+                <input id="sandboxDouble" type="checkbox">
+                <span>携带双沙盘 <small>抗压位</small></span>
+              </label>
+              <label class="check-pill">
+                <input id="weakenThree" type="checkbox">
+                <span>携带三个削弱藏 <small>抗压位</small></span>
+              </label>
+              <label class="check-pill">
+                <input id="fullHunt" type="checkbox">
+                <span>全追猎（含 3/5 层 Boss） <small>抗压位</small></span>
+              </label>
+            </div>
+            <p class="note">普通位结算时至少携带一个沙盘；抗压位结算时应携带双沙盘与三个削弱藏，未按要求携带则本局分数无效。</p>
+
+            <div class="group-title">决赛限时</div>
+            <div class="grid two">
+              <label class="field">
+                <span>决赛探索时长（分钟，留空则不计限时）</span>
+                <input id="finalMinutes" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+              </label>
+              <div class="field">
+                <span>从计时器读取</span>
+                <button class="btn" id="timerFill" type="button">填入计时器分钟数</button>
+              </div>
+            </div>
+            <p class="note">仅决赛阶段适用：两小时内完成 +100 速通分；探索时长超过三个半小时，每超过一分钟 -50（分钟数向上取整）。</p>
+
+            <div class="group-title">全队项（计入团队总分）</div>
+            <div class="check-grid">
+              <label class="check-pill">
+                <input id="teamNoEnding1" type="checkbox" data-group="team" data-score="-200" data-label="全队无人通关一结局">
+                <span>无人通关一结局 <small>-200</small></span>
+              </label>
+              <label class="check-pill">
+                <input id="teamNoEnding2" type="checkbox" data-group="team" data-score="-300" data-label="全队无人通关二结局">
+                <span>无人通关二结局 <small>-300</small></span>
+              </label>
+              <label class="check-pill">
+                <input id="teamNoEnding3" type="checkbox" data-group="team" data-score="-500" data-label="全队无人通关三结局">
+                <span>无人通关三结局 <small>-500</small></span>
+              </label>
+            </div>
+            <div class="grid two">
+              <label class="field">
+                <span>全队源石锭提取数量 · 超出 300 每 1 元 -50</span>
+                <input id="originium" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+              </label>
+            </div>
+            <p class="note">全队项作用于团队总分，不计入队员个人最终得分；四名队员共用这一组数据。</p>
+          </div>
+        </section>
+
         <section>
           <div class="section-head">
             <h2>结算基础分</h2>
@@ -877,23 +985,23 @@
             <div class="group-title">结局通关</div>
             <div class="check-grid">
               <label class="check-pill">
-                <input type="checkbox" data-group="combat" data-score="200" data-label="通关一结局">
+                <input id="ending1" type="checkbox" data-group="combat" data-score="200" data-label="通关一结局">
                 <span>一结局 <small>+200</small></span>
               </label>
               <label class="check-pill">
-                <input type="checkbox" data-group="combat" data-score="250" data-label="通关二结局">
+                <input id="ending2" type="checkbox" data-group="combat" data-score="250" data-label="通关二结局">
                 <span>二结局 <small>+250</small></span>
               </label>
               <label class="check-pill">
-                <input type="checkbox" data-group="combat" data-score="250" data-label="通关追猎一结局">
+                <input id="huntEnding1" type="checkbox" data-group="combat" data-score="250" data-label="通关追猎一结局">
                 <span>追猎一结局 <small>+250</small></span>
               </label>
               <label class="check-pill">
-                <input type="checkbox" data-group="combat" data-score="500" data-label="通关三结局">
+                <input id="ending3" type="checkbox" data-group="combat" data-score="500" data-label="通关三结局">
                 <span>三结局 <small>+500</small></span>
               </label>
               <label class="check-pill">
-                <input type="checkbox" data-group="combat" data-score="550" data-label="通关追猎三结局">
+                <input id="huntEnding3" type="checkbox" data-group="combat" data-score="550" data-label="通关追猎三结局">
                 <span>追猎三结局 <small>+550</small></span>
               </label>
             </div>
@@ -957,7 +1065,7 @@
             <div class="group-title">海选赛限制</div>
             <div class="check-grid">
               <label class="check-pill">
-                <input type="checkbox" data-group="limit" data-score="-1000" data-label="海选赛误抓复得之轮/果腹">
+                <input id="invalidPick" type="checkbox" data-group="limit" data-score="-1000" data-label="海选赛误抓复得之轮/果腹">
                 <span>误抓复得之轮/果腹 <small>-1000</small></span>
               </label>
             </div>
@@ -965,118 +1073,41 @@
           </div>
         </section>
 
-        <section>
-          <div class="section-head">
-            <h2>位置、队伍与决赛</h2>
-            <span>位置系数、藏品要求、限时与全队项</span>
-          </div>
-          <div class="section-body">
-            <div class="group-title">参赛位置</div>
-            <div class="check-grid">
-              <label class="check-pill">
-                <input type="radio" name="role" value="normal" data-label="普通位" checked>
-                <span>普通位 <small>×1.0</small></span>
-              </label>
-              <label class="check-pill">
-                <input type="radio" name="role" value="pressure" data-label="抗压位">
-                <span>抗压位 <small>×1.3</small></span>
-              </label>
-            </div>
-            <p class="note">每队 3 名普通位与 1 名抗压位；抗压位强制全追猎，最终得分在个人分基础上 ×1.3。</p>
-
-            <div class="group-title">藏品要求（未满足则本局分数无效）</div>
-            <div class="check-grid">
-              <label class="check-pill">
-                <input id="sandboxOne" type="checkbox">
-                <span>至少携带一个沙盘 <small>普通位</small></span>
-              </label>
-              <label class="check-pill">
-                <input id="sandboxDouble" type="checkbox">
-                <span>携带双沙盘 <small>抗压位</small></span>
-              </label>
-              <label class="check-pill">
-                <input id="weakenThree" type="checkbox">
-                <span>携带三个削弱藏 <small>抗压位</small></span>
-              </label>
-              <label class="check-pill">
-                <input id="fullHunt" type="checkbox">
-                <span>全追猎（含 3/5 层 Boss） <small>抗压位</small></span>
-              </label>
-            </div>
-            <p class="note">普通位结算时至少携带一个沙盘；抗压位结算时应携带双沙盘与三个削弱藏，未按要求携带则本局分数无效。</p>
-
-            <div class="group-title">决赛限时</div>
-            <div class="grid two">
-              <label class="field">
-                <span>决赛探索时长（分钟，留空则不计限时）</span>
-                <input id="finalMinutes" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
-              </label>
-              <div class="field">
-                <span>从计时器读取</span>
-                <button class="btn" id="timerFill" type="button">填入计时器分钟数</button>
-              </div>
-            </div>
-            <p class="note">仅决赛阶段适用：两小时内完成 +100 速通分；探索时长超过三个半小时，每超过一分钟 -50（分钟数向上取整）。</p>
-
-            <div class="group-title">全队项（计入团队总分）</div>
-            <div class="check-grid">
-              <label class="check-pill">
-                <input type="checkbox" data-group="team" data-score="-200" data-label="全队无人通关一结局">
-                <span>无人通关一结局 <small>-200</small></span>
-              </label>
-              <label class="check-pill">
-                <input type="checkbox" data-group="team" data-score="-300" data-label="全队无人通关二结局">
-                <span>无人通关二结局 <small>-300</small></span>
-              </label>
-              <label class="check-pill">
-                <input type="checkbox" data-group="team" data-score="-500" data-label="全队无人通关三结局">
-                <span>无人通关三结局 <small>-500</small></span>
-              </label>
-            </div>
-            <div class="grid two">
-              <label class="field">
-                <span>全队源石锭提取数量 · 超出 300 每 1 元 -50</span>
-                <input id="originium" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
-              </label>
-            </div>
-            <p class="note">全队项作用于团队总分，不计入队员个人最终得分。</p>
-          </div>
-        </section>
       </div>
 
       <div class="side-stack">
         <aside class="summary" aria-live="polite">
           <div class="summary-main">
-            <span>个人最终得分</span>
+            <span>团队总分</span>
             <strong id="totalScore">0</strong>
-            <span id="scoreNote">个人分 0 · 系数 ×1</span>
+            <span id="scoreNote">四人合计 0 · 全队项 0</span>
           </div>
           <div class="breakdown">
             <div class="score-box">
-              <span>结算基础分</span>
-              <strong id="baseScore">0</strong>
+              <span>普通位①</span>
+              <strong id="memberScore1">0</strong>
             </div>
             <div class="score-box">
-              <span>作战与结局分</span>
-              <strong id="combatScore">0</strong>
+              <span>普通位②</span>
+              <strong id="memberScore2">0</strong>
             </div>
             <div class="score-box">
-              <span>限制与扣除分</span>
-              <strong id="limitScore">0</strong>
+              <span>普通位③</span>
+              <strong id="memberScore3">0</strong>
             </div>
             <div class="score-box">
-              <span>决赛限时分</span>
-              <strong id="finalScore">0</strong>
+              <span>抗压位 ×1.3</span>
+              <strong id="memberScore4">0</strong>
             </div>
           </div>
           <div class="team-total">
-            <span>全队项（计入团队总分）</span>
+            <span>全队项（无人通关结局、源石锭）</span>
             <strong id="teamScore">0</strong>
           </div>
           <div class="detail">
-            <h3>计分明细</h3>
+            <h3 id="detailTitle">计分明细 · 普通位①</h3>
             <ul class="detail-list" id="detailList"></ul>
-            <p class="empty" id="emptyDetail">点击计算后显示已计入项目。</p>
+            <p class="empty" id="emptyDetail">填写数据后自动显示已计入项目。</p>
           </div>
         </aside>
 
@@ -1105,25 +1136,22 @@
   <div class="toast" id="toast">已复制</div>
 
   <script>
-    const scoreState = {
-      total: 0,
-      personal: 0,
-      coefficient: 1,
-      invalid: false,
-      base: 0,
-      combat: 0,
-      limit: 0,
-      final: 0,
-      team: 0,
-      details: []
-    };
+    const MEMBERS = [
+      { label: "普通位①", role: "normal" },
+      { label: "普通位②", role: "normal" },
+      { label: "普通位③", role: "normal" },
+      { label: "抗压位", role: "pressure" }
+    ];
+
+    const MEMBER_NUMBER_IDS = ["settlementRaw", "relicCount", "partsCount", "ragPet", "ragOther", "beasts", "temp6", "temp5", "temp4", "tempEnding", "sixStarThird", "sixStarFourth", "fiveStarExtra", "vinePrice", "finalMinutes"];
+    const MEMBER_CHECK_IDS = ["bossThree", "expeditionGold", "ending1", "ending2", "huntEnding1", "ending3", "huntEnding3", "invalidPick", "sandboxOne", "sandboxDouble", "weakenThree", "fullHunt"];
 
     const formatScore = (value) => Number.isInteger(value) ? String(value) : value.toFixed(2).replace(/\.?0+$/, "");
     const formatDelta = (value) => `${value > 0 ? "+" : ""}${formatScore(value)}`;
 
-    const num = (id) => {
-      const value = Number(document.getElementById(id).value);
-      return Number.isFinite(value) && value > 0 ? value : 0;
+    const toCount = (value) => {
+      const number = Number(value);
+      return Number.isFinite(number) && number > 0 ? number : 0;
     };
 
     const addDetail = (state, group, label, score) => {
@@ -1160,6 +1188,21 @@
         const groupCompare = groupOrder[a.group] - groupOrder[b.group];
         return groupCompare || a.index - b.index;
       });
+
+    let activeMember = 0;
+    const memberData = MEMBERS.map(() => ({ numbers: {}, checks: {} }));
+    let memberResults = MEMBERS.map(() => computePlaceholder());
+    let teamResult = { total: 0, details: [] };
+    let activeState = { details: [], invalid: false };
+
+    function computePlaceholder() {
+      return { base: 0, combat: 0, limit: 0, final: 0, personal: 0, coefficient: 1, invalid: false, total: 0, details: [] };
+    }
+
+    const SCORED_ITEMS = ["bossThree", "expeditionGold", "ending1", "ending2", "huntEnding1", "ending3", "huntEnding3", "invalidPick"].map((id) => {
+      const input = document.getElementById(id);
+      return { id, group: input.dataset.group, score: Number(input.dataset.score), label: input.dataset.label };
+    });
 
     let timerElapsedMs = 0;
     let timerStartedAt = 0;
@@ -1213,38 +1256,76 @@
       renderTimer();
     }
 
-    function calculate() {
+    function readMemberForm() {
+      const numbers = {};
+      MEMBER_NUMBER_IDS.forEach((id) => {
+        numbers[id] = document.getElementById(id).value;
+      });
+      const checks = {};
+      MEMBER_CHECK_IDS.forEach((id) => {
+        checks[id] = document.getElementById(id).checked;
+      });
+      return { numbers, checks };
+    }
+
+    function applyMemberForm(data) {
+      MEMBER_NUMBER_IDS.forEach((id) => {
+        document.getElementById(id).value = data.numbers[id] || "";
+      });
+      MEMBER_CHECK_IDS.forEach((id) => {
+        document.getElementById(id).checked = !!data.checks[id];
+      });
+    }
+
+    function readTeamForm() {
+      return {
+        noEnding1: document.getElementById("teamNoEnding1").checked,
+        noEnding2: document.getElementById("teamNoEnding2").checked,
+        noEnding3: document.getElementById("teamNoEnding3").checked,
+        originium: document.getElementById("originium").value
+      };
+    }
+
+    function resetTeamForm() {
+      ["teamNoEnding1", "teamNoEnding2", "teamNoEnding3"].forEach((id) => {
+        document.getElementById(id).checked = false;
+      });
+      document.getElementById("originium").value = "";
+    }
+
+    function computeMember(data, role) {
       const state = {
-        total: 0,
-        personal: 0,
-        coefficient: 1,
-        invalid: false,
         base: 0,
         combat: 0,
         limit: 0,
         final: 0,
-        team: 0,
+        personal: 0,
+        coefficient: role === "pressure" ? 1.3 : 1,
+        invalid: false,
+        total: 0,
         details: []
       };
+      const count = (id) => toCount(data.numbers[id]);
 
-      const rawSettlement = num("settlementRaw");
+      const rawSettlement = count("settlementRaw");
       addDetail(state, "base", `结算分 ${formatScore(rawSettlement)} × 0.8`, rawSettlement * 0.8);
 
-      const relicCount = num("relicCount");
+      const relicCount = count("relicCount");
       addDetail(state, "base", `结算页面藏品 ${relicCount} 个 × 5`, relicCount * 5);
 
-      const partsCount = num("partsCount");
+      const partsCount = count("partsCount");
       addDetail(state, "base", `零件 ${partsCount} 个 × 2`, partsCount * 2);
 
-      const ragPet = num("ragPet");
+      const ragPet = count("ragPet");
       addDetail(state, "base", `褴褛猫/褴褛狗 ${ragPet} 个 × 10`, ragPet * 10);
 
-      const ragOther = num("ragOther");
+      const ragOther = count("ragOther");
       addDetail(state, "base", `其余褴褛 ${ragOther} 个 × 20`, ragOther * 20);
 
-      document.querySelectorAll('input[type="checkbox"][data-group]').forEach((input) => {
-        if (!input.checked || input.disabled) return;
-        addDetail(state, input.dataset.group, input.dataset.label, Number(input.dataset.score));
+      SCORED_ITEMS.forEach((item) => {
+        if (!data.checks[item.id]) return;
+        if (item.id === "expeditionGold" && !data.checks.bossThree) return;
+        addDetail(state, item.group, item.label, item.score);
       });
 
       const combatCounts = [
@@ -1254,11 +1335,11 @@
         ["temp4", 5, "临时招募四星干员"]
       ];
       combatCounts.forEach(([id, unit, label]) => {
-        const count = num(id);
-        addDetail(state, "combat", `${label} × ${count}`, count * unit);
+        const value = count(id);
+        addDetail(state, "combat", `${label} × ${value}`, value * unit);
       });
 
-      const tempEnding = num("tempEnding");
+      const tempEnding = count("tempEnding");
       if (tempEnding) {
         addDetail(state, "combat", `携带临招干员进入三结局 × ${tempEnding}（每个 +50，上限 200）`, Math.min(tempEnding * 50, 200));
       }
@@ -1269,17 +1350,17 @@
         ["fiveStarExtra", -500, "暴雨/渡桥/乌啾额外抓取"]
       ];
       limitCounts.forEach(([id, unit, label]) => {
-        const count = num(id);
-        addDetail(state, "limit", `${label} × ${count}`, count * unit);
+        const value = count(id);
+        addDetail(state, "limit", `${label} × ${value}`, value * unit);
       });
 
-      const vinePrice = num("vinePrice");
+      const vinePrice = count("vinePrice");
       if (vinePrice > 100) {
         const over = vinePrice - 100;
         addDetail(state, "limit", `板藤出售价值 ${formatScore(vinePrice)} 元，超出 ${formatScore(over)} 元 × -20`, over * -20);
       }
 
-      const finalMinutes = num("finalMinutes");
+      const finalMinutes = count("finalMinutes");
       if (finalMinutes > 0 && finalMinutes <= 120) {
         addDetail(state, "final", `探索时长 ${formatScore(finalMinutes)} 分钟（两小时内）速通分`, 100);
       }
@@ -1288,20 +1369,9 @@
         addDetail(state, "final", `探索时长 ${formatScore(finalMinutes)} 分钟，超时 ${over} 分钟 × -50`, over * -50);
       }
 
-      const originium = num("originium");
-      if (originium > 300) {
-        const over = originium - 300;
-        addDetail(state, "team", `全队源石锭提取 ${formatScore(originium)}，超出 ${formatScore(over)} × -50`, over * -50);
-      }
-
-      const pressure = isPressureRole();
-      state.coefficient = pressure ? 1.3 : 1;
-
-      const hasSandbox = document.getElementById("sandboxOne").checked;
-      const hasDoubleSandbox = document.getElementById("sandboxDouble").checked;
-      const hasWeaken = document.getElementById("weakenThree").checked;
-      state.invalid = pressure ? !(hasDoubleSandbox && hasWeaken) : !hasSandbox;
-
+      const pressure = role === "pressure";
+      const hasData = MEMBER_NUMBER_IDS.some((id) => count(id) > 0) || MEMBER_CHECK_IDS.some((id) => !!data.checks[id]);
+      state.invalid = hasData && (pressure ? !(data.checks.sandboxDouble && data.checks.weakenThree) : !data.checks.sandboxOne);
       state.personal = state.base + state.combat + state.limit + state.final;
       state.total = state.invalid ? 0 : state.personal * state.coefficient;
 
@@ -1311,24 +1381,60 @@
           : "普通位未携带沙盘，按规则五本局分数无效");
       }
 
-      Object.assign(scoreState, state);
-      render(state);
+      return state;
     }
 
-    function render(state) {
-      document.getElementById("heroTotal").textContent = formatScore(state.total);
-      document.getElementById("totalScore").textContent = formatScore(state.total);
-      document.getElementById("scoreNote").textContent = `个人分 ${formatScore(state.personal)} · 系数 ×${state.coefficient}${state.invalid ? " · 本局无效" : ""}`;
-      document.getElementById("baseScore").textContent = formatScore(state.base);
-      document.getElementById("combatScore").textContent = formatScore(state.combat);
-      document.getElementById("limitScore").textContent = formatScore(state.limit);
-      document.getElementById("finalScore").textContent = formatScore(state.final);
-      document.getElementById("teamScore").textContent = formatDelta(state.team);
+    function computeTeam(team) {
+      const state = { total: 0, details: [] };
+      const add = (label, score) => {
+        if (!score) return;
+        state.total += score;
+        state.details.push({ group: "team", label, score });
+      };
 
+      if (team.noEnding1) add("全队无人通关一结局", -200);
+      if (team.noEnding2) add("全队无人通关二结局", -300);
+      if (team.noEnding3) add("全队无人通关三结局", -500);
+
+      const originium = toCount(team.originium);
+      if (originium > 300) {
+        const over = originium - 300;
+        add(`全队源石锭提取 ${formatScore(originium)}，超出 ${formatScore(over)} × -50`, over * -50);
+      }
+
+      return state;
+    }
+
+    function calculate() {
+      memberData[activeMember] = readMemberForm();
+      memberResults = memberData.map((data, index) => computeMember(data, MEMBERS[index].role));
+      teamResult = computeTeam(readTeamForm());
+      activeState = memberResults[activeMember];
+      render();
+    }
+
+    function render() {
+      const memberSum = memberResults.reduce((sum, result) => sum + result.total, 0);
+      const grandTotal = memberSum + teamResult.total;
+
+      document.getElementById("heroTotal").textContent = formatScore(grandTotal);
+      document.getElementById("totalScore").textContent = formatScore(grandTotal);
+      document.getElementById("scoreNote").textContent = `四人合计 ${formatScore(memberSum)} · 全队项 ${formatDelta(teamResult.total)}`;
+
+      MEMBERS.forEach((member, index) => {
+        const value = formatScore(memberResults[index].total);
+        document.getElementById(`memberScore${index + 1}`).textContent = value;
+        document.getElementById(`memberChip${index + 1}`).textContent = value;
+      });
+
+      document.getElementById("teamScore").textContent = formatDelta(teamResult.total);
+      document.getElementById("detailTitle").textContent = `计分明细 · ${MEMBERS[activeMember].label}${activeState.invalid ? "（本局无效）" : ""}`;
+
+      const details = activeState.details.concat(teamResult.details);
       const list = document.getElementById("detailList");
       list.innerHTML = "";
-      document.getElementById("emptyDetail").hidden = state.details.length > 0;
-      sortedDetails(state.details).forEach((item) => {
+      document.getElementById("emptyDetail").hidden = details.length > 0;
+      sortedDetails(details).forEach((item) => {
         const li = document.createElement("li");
         const span = document.createElement("span");
         const score = document.createElement("b");
@@ -1344,38 +1450,74 @@
       });
     }
 
-    function resetAll() {
-      document.querySelectorAll("input").forEach((input) => {
-        if (input.type === "checkbox") input.checked = false;
-        if (input.type === "number") input.value = "";
-        if (input.type === "radio") input.checked = input.defaultChecked;
-      });
-      document.querySelectorAll("select").forEach((select) => {
-        select.selectedIndex = 0;
-      });
+    function switchMember(nextIndex) {
+      if (nextIndex === activeMember) return;
+      memberData[activeMember] = readMemberForm();
+      activeMember = nextIndex;
+      applyMemberForm(memberData[activeMember]);
       syncRequirementPills();
       syncExpeditionPill();
       calculate();
     }
 
+    function clearMember(index) {
+      memberData[index] = { numbers: {}, checks: {} };
+    }
+
+    function clearActiveMember() {
+      clearMember(activeMember);
+      applyMemberForm(memberData[activeMember]);
+      syncRequirementPills();
+      syncExpeditionPill();
+      calculate();
+      showToast(`${MEMBERS[activeMember].label} 数据已清空`);
+    }
+
+    function clearWholeTeam() {
+      MEMBERS.forEach((member, index) => clearMember(index));
+      applyMemberForm(memberData[activeMember]);
+      resetTeamForm();
+      syncRequirementPills();
+      syncExpeditionPill();
+      calculate();
+      showToast("全队数据已清空");
+    }
+
     async function copyDetails() {
       calculate();
+      const memberSum = memberResults.reduce((sum, result) => sum + result.total, 0);
       const lines = [
-        `节奏人杯 算分结果：个人最终得分 ${formatScore(scoreState.total)}`,
-        `个人分 ${formatScore(scoreState.personal)} × 位置系数 ${scoreState.coefficient}${scoreState.invalid ? "（本局无效，记 0）" : ""}`,
-        `结算基础分：${formatScore(scoreState.base)}`,
-        `作战与结局分：${formatScore(scoreState.combat)}`,
-        `限制与扣除分：${formatScore(scoreState.limit)}`,
-        `决赛限时分：${formatScore(scoreState.final)}`,
-        `全队项（团队总分）：${formatDelta(scoreState.team)}`
+        `节奏人杯 算分结果：团队总分 ${formatScore(memberSum + teamResult.total)}`,
+        `四人合计：${formatScore(memberSum)}；全队项：${formatDelta(teamResult.total)}`
       ];
-      if (scoreState.details.length) {
-        lines.push("", "计分明细：");
-        sortedDetails(scoreState.details).forEach((item) => {
+      MEMBERS.forEach((member, index) => {
+        const result = memberResults[index];
+        lines.push(`${member.label}：${formatScore(result.total)}（个人分 ${formatScore(result.personal)} × 位置系数 ${result.coefficient}${result.invalid ? "，本局无效" : ""}）`);
+      });
+
+      MEMBERS.forEach((member, index) => {
+        const details = sortedDetails(memberResults[index].details);
+        lines.push("", `${member.label} 计分明细：`);
+        if (!details.length) {
+          lines.push("- 无");
+          return;
+        }
+        details.forEach((item) => {
           const value = item.group === "note" ? "—" : formatDelta(item.score);
           lines.push(`- ${groupName[item.group]} · ${item.label}：${value}`);
         });
+      });
+
+      const teamDetails = sortedDetails(teamResult.details);
+      lines.push("", "全队项计分明细：");
+      if (!teamDetails.length) {
+        lines.push("- 无");
+      } else {
+        teamDetails.forEach((item) => {
+          lines.push(`- ${groupName[item.group]} · ${item.label}：${formatDelta(item.score)}`);
+        });
       }
+
       try {
         await navigator.clipboard.writeText(lines.join("\n"));
         showToast("已复制明细");
@@ -1394,7 +1536,8 @@
 
     document.getElementById("calcBtn").addEventListener("click", calculate);
     document.getElementById("copyBtn").addEventListener("click", copyDetails);
-    document.getElementById("resetBtn").addEventListener("click", resetAll);
+    document.getElementById("clearMemberBtn").addEventListener("click", clearActiveMember);
+    document.getElementById("clearTeamBtn").addEventListener("click", clearWholeTeam);
     document.getElementById("timerToggle").addEventListener("click", toggleTimer);
     document.getElementById("timerReset").addEventListener("click", resetTimer);
     document.getElementById("timerFill").addEventListener("click", () => {
@@ -1402,7 +1545,7 @@
       calculate();
     });
 
-    const roleInputs = Array.from(document.querySelectorAll('input[name="role"]'));
+    const memberInputs = Array.from(document.querySelectorAll('input[name="member"]'));
     const sandboxOne = document.getElementById("sandboxOne");
     const sandboxDouble = document.getElementById("sandboxDouble");
     const weakenThree = document.getElementById("weakenThree");
@@ -1411,8 +1554,7 @@
     const expeditionGold = document.getElementById("expeditionGold");
 
     function isPressureRole() {
-      const role = document.querySelector('input[name="role"]:checked');
-      return !!role && role.value === "pressure";
+      return MEMBERS[activeMember].role === "pressure";
     }
 
     function syncRequirementPills() {
@@ -1435,15 +1577,16 @@
       if (!bossThree.checked) expeditionGold.checked = false;
     }
 
-    roleInputs.forEach((input) => input.addEventListener("change", () => {
-      syncRequirementPills();
-      calculate();
-    }));
+    memberInputs.forEach((input) => input.addEventListener("change", () => switchMember(Number(input.value))));
 
     bossThree.addEventListener("change", () => {
       syncExpeditionPill();
       calculate();
     });
+
+    const formRoot = document.querySelector("main");
+    formRoot.addEventListener("input", () => calculate());
+    formRoot.addEventListener("change", () => calculate());
 
     syncRequirementPills();
     syncExpeditionPill();
