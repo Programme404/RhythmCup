@@ -1,0 +1,1437 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>节奏人杯 算分器</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #e8f0f4;
+      --paper: #fafdfe;
+      --paper-2: #f1f7fa;
+      --ink: #1f2e38;
+      --muted: #5f7483;
+      --line: #c6d6df;
+      --teal: #1b7078;
+      --teal-2: #d7ecef;
+      --rose: #b9516f;
+      --rose-2: #f5e0e7;
+      --amber: #ad7a38;
+      --amber-2: #f4e9d6;
+      --shadow: 0 18px 50px rgba(15, 40, 55, .14);
+      --radius: 8px;
+      font-family: "Microsoft YaHei UI", "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", system-ui, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, .62), rgba(232, 240, 244, .96) 320px),
+        var(--bg);
+      color: var(--ink);
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app-header {
+      position: relative;
+      min-height: 178px;
+      overflow: hidden;
+      border-bottom: 1px solid rgba(198, 214, 223, .65);
+      background: #dce7ed;
+    }
+
+    .app-header::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(9, 25, 36, .76), rgba(9, 25, 36, .18) 48%, rgba(250, 253, 254, .52)),
+        url("https://media.prts.wiki/d/d0/%E4%B8%BB%E9%A2%98%E5%9B%BE_%E6%B2%89%E6%B2%A6%E8%80%85%E7%9A%84%E9%BB%91%E6%B5%81%E6%A0%91%E6%B5%B7.png") center / cover no-repeat;
+      filter: saturate(.9) brightness(1.08);
+      transform: scale(1.01);
+    }
+
+    .header-inner {
+      position: relative;
+      max-width: 1220px;
+      margin: 0 auto;
+      padding: 30px 22px 34px;
+      min-height: 178px;
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .title-block {
+      color: #fafdfe;
+      text-shadow: 0 2px 18px rgba(6, 18, 28, .55);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 10px;
+      padding: 5px 10px;
+      border: 1px solid rgba(255, 255, 255, .58);
+      border-radius: 999px;
+      background: rgba(250, 253, 254, .16);
+      font-size: 13px;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(30px, 4.8vw, 56px);
+      line-height: 1.05;
+      letter-spacing: 0;
+      font-weight: 800;
+    }
+
+    .subtitle {
+      margin: 10px 0 0;
+      color: rgba(250, 253, 254, .92);
+      font-size: 17px;
+    }
+
+    .header-score {
+      min-width: 190px;
+      padding: 14px 18px;
+      border: 1px solid rgba(255, 255, 255, .5);
+      border-radius: var(--radius);
+      background: rgba(250, 253, 254, .78);
+      color: var(--ink);
+      box-shadow: 0 10px 26px rgba(12, 32, 44, .20);
+      backdrop-filter: blur(8px);
+    }
+
+    .header-score span {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .header-score strong {
+      display: block;
+      margin-top: 2px;
+      color: var(--teal);
+      font-size: 36px;
+      line-height: 1;
+    }
+
+    main {
+      max-width: 1220px;
+      margin: 0 auto;
+      padding: 22px;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .formula {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      min-height: 40px;
+      padding: 0 15px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--paper);
+      color: var(--ink);
+      box-shadow: 0 1px 0 rgba(255, 255, 255, .8) inset;
+      transition: transform .16s ease, border-color .16s ease, background .16s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      border-color: #b3c6d1;
+      background: #f5fbfe;
+    }
+
+    .btn.primary {
+      border-color: #18656e;
+      background: var(--teal);
+      color: white;
+      box-shadow: 0 8px 18px rgba(27, 112, 120, .22);
+    }
+
+    .btn.primary:hover {
+      background: #155c64;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 330px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .sections {
+      display: grid;
+      gap: 14px;
+    }
+
+    section,
+    .summary,
+    .timer-panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(250, 253, 254, .92);
+      box-shadow: var(--shadow);
+    }
+
+    section {
+      overflow: hidden;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 15px 16px 12px;
+      border-bottom: 1px solid #dbe7ed;
+      background: linear-gradient(180deg, rgba(241, 247, 250, .95), rgba(250, 253, 254, .95));
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: 0;
+    }
+
+    .section-head span {
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .section-body {
+      padding: 16px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .grid.two {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+      min-width: 0;
+    }
+
+    label.field > span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    input[type="number"],
+    select {
+      width: 100%;
+      min-height: 40px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fbfeff;
+      color: var(--ink);
+      outline: none;
+      transition: border-color .16s ease, box-shadow .16s ease;
+    }
+
+    input[type="number"]:focus,
+    select:focus {
+      border-color: var(--teal);
+      box-shadow: 0 0 0 3px rgba(27, 112, 120, .15);
+    }
+
+    .group-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 2px 0 -4px;
+      color: #40525e;
+      font-weight: 700;
+    }
+
+    .group-title::after {
+      content: "";
+      height: 1px;
+      flex: 1;
+      background: #d8e5ec;
+    }
+
+    .check-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .check-pill,
+    .segment label {
+      position: relative;
+      min-width: 0;
+    }
+
+    .check-pill input,
+    .segment input {
+      position: absolute;
+      inline-size: 1px;
+      block-size: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .check-pill span {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      min-height: 42px;
+      padding: 9px 11px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fbfeff;
+      color: #2e414d;
+      transition: background .16s ease, border-color .16s ease, box-shadow .16s ease;
+    }
+
+    .check-pill small {
+      flex: 0 0 auto;
+      color: var(--teal);
+      font-weight: 700;
+    }
+
+    .check-pill input:checked + span {
+      border-color: #7fb9c4;
+      background: var(--teal-2);
+      box-shadow: 0 0 0 3px rgba(27, 112, 120, .10);
+    }
+
+    .check-pill.easter-egg input:checked + span {
+      border-color: rgba(188, 142, 195, .55);
+      background:
+        linear-gradient(105deg,
+          rgba(255, 153, 153, .28),
+          rgba(255, 214, 128, .26),
+          rgba(246, 244, 155, .24),
+          rgba(150, 219, 170, .25),
+          rgba(137, 204, 224, .26),
+          rgba(166, 157, 221, .25),
+          rgba(219, 153, 204, .27));
+      box-shadow: 0 0 0 3px rgba(184, 139, 195, .13);
+      animation: egg-pop-shake .42s ease-out;
+    }
+
+    .check-pill.easter-egg input:checked + span small {
+      color: #8e5f9e;
+    }
+
+    @keyframes egg-pop-shake {
+      0% {
+        transform: rotate(0deg) scale(1);
+      }
+      18% {
+        transform: rotate(-1.8deg) scale(1.055);
+      }
+      34% {
+        transform: rotate(1.8deg) scale(1.07);
+      }
+      50% {
+        transform: rotate(-1.2deg) scale(1.055);
+      }
+      66% {
+        transform: rotate(1.2deg) scale(1.035);
+      }
+      82% {
+        transform: rotate(-.6deg) scale(1.015);
+      }
+      100% {
+        transform: rotate(0deg) scale(1);
+      }
+    }
+
+    .check-pill input:disabled + span {
+      opacity: .45;
+      cursor: not-allowed;
+      background: #edf4f8;
+    }
+
+    .note {
+      margin: -4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .side-stack {
+      position: sticky;
+      top: 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .summary {
+      overflow: hidden;
+    }
+
+    .summary-main {
+      padding: 18px;
+      background: linear-gradient(180deg, #fafdfe, #eef6fa);
+      border-bottom: 1px solid #dbe7ed;
+    }
+
+    .summary-main span {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .summary-main strong {
+      display: block;
+      margin-top: 4px;
+      color: var(--teal);
+      font-size: 48px;
+      line-height: 1;
+    }
+
+    .breakdown {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      padding: 14px;
+      border-bottom: 1px solid #dbe7ed;
+    }
+
+    .score-box {
+      padding: 10px;
+      border: 1px solid #d8e5ec;
+      border-radius: var(--radius);
+      background: #fbfeff;
+    }
+
+    .score-box span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .score-box strong {
+      display: block;
+      margin-top: 2px;
+      font-size: 22px;
+      color: #334751;
+    }
+
+    .detail {
+      max-height: 430px;
+      overflow: auto;
+      padding: 14px 16px 16px;
+    }
+
+    .detail h3 {
+      margin: 0 0 10px;
+      font-size: 15px;
+    }
+
+    .detail-list {
+      display: grid;
+      gap: 7px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .detail-list li {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 7px 0;
+      border-bottom: 1px dashed #d6e4ec;
+      color: #425663;
+      font-size: 13px;
+    }
+
+    .detail-list li:last-child {
+      border-bottom: 0;
+    }
+
+    .detail-list b {
+      flex: 0 0 auto;
+      color: var(--amber);
+    }
+
+    .detail-list b.rainbow-score {
+      background:
+        linear-gradient(105deg,
+          #c86161,
+          #d9854e,
+          #d4b84f,
+          #73a96a,
+          #4d9ca6,
+          #5c82c4,
+          #8365b8,
+          #ad6aa6);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .empty {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .timer-panel {
+      display: grid;
+      justify-items: center;
+      gap: 14px;
+      padding: 14px 16px 16px;
+      background: rgba(250, 253, 254, .92);
+    }
+
+    .timer-title {
+      justify-self: stretch;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .timer-display {
+      font-variant-numeric: tabular-nums;
+      color: #334751;
+      font-size: 42px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .timer-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .timer-btn {
+      position: relative;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      box-shadow: 0 4px 12px rgba(15, 40, 55, .16);
+      transition: transform .16s ease, background .16s ease, box-shadow .16s ease;
+    }
+
+    .timer-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(15, 40, 55, .20);
+    }
+
+    .timer-toggle {
+      background: #63ad72;
+    }
+
+    .timer-toggle.is-running {
+      background: #d36d6d;
+    }
+
+    .timer-toggle::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-top: 7px solid transparent;
+      border-bottom: 7px solid transparent;
+      border-left: 10px solid rgba(255, 255, 255, .92);
+      transform: translate(-38%, -50%);
+    }
+
+    .timer-toggle.is-running::before,
+    .timer-toggle.is-running::after {
+      content: "";
+      position: absolute;
+      top: 9px;
+      width: 4px;
+      height: 14px;
+      border: 0;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, .92);
+      transform: none;
+    }
+
+    .timer-toggle.is-running::before {
+      left: 11px;
+    }
+
+    .timer-toggle.is-running::after {
+      left: 17px;
+    }
+
+    .timer-reset {
+      background: #a8adb0;
+    }
+
+    .timer-reset::before {
+      content: "";
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      width: 13px;
+      height: 13px;
+      border: 3px solid rgba(255, 255, 255, .92);
+      border-right-color: transparent;
+      border-radius: 50%;
+      transform: rotate(-35deg);
+    }
+
+    .timer-reset::after {
+      content: "";
+      position: absolute;
+      top: 7px;
+      left: 18px;
+      width: 0;
+      height: 0;
+      border-top: 4px solid transparent;
+      border-bottom: 4px solid transparent;
+      border-left: 6px solid rgba(255, 255, 255, .92);
+      transform: rotate(12deg);
+    }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      padding: 10px 13px;
+      border: 1px solid #c3dce4;
+      border-radius: var(--radius);
+      background: #f3fbfd;
+      color: #245a63;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(8px);
+      pointer-events: none;
+      transition: opacity .18s ease, transform .18s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .app-footer {
+      max-width: 1220px;
+      margin: 4px auto 26px;
+      padding: 0 22px;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .app-footer span {
+      display: inline-block;
+      margin: 4px 10px;
+    }
+
+    .footer-version {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin: 4px 10px;
+    }
+
+    .footer-version span {
+      margin: 0;
+    }
+
+    .github-link {
+      display: inline-grid;
+      place-items: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      color: #5c7380;
+      transition: color .16s ease, background .16s ease, transform .16s ease;
+      vertical-align: middle;
+    }
+
+    .github-link:hover {
+      background: #dbe7ed;
+      color: #1f2e38;
+      transform: translateY(-1px);
+    }
+
+    .github-link svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+
+    .tool-link {
+      display: inline-flex;
+      align-items: center;
+      margin: 4px 10px;
+      padding: 5px 13px;
+      border-radius: 999px;
+      border: 1px solid rgba(92, 115, 128, .3);
+      background: #ffffff;
+      color: #3d5f6e;
+      font-size: 13px;
+      text-decoration: none;
+      vertical-align: middle;
+      transition: color .16s ease, background .16s ease, border-color .16s ease, transform .16s ease;
+    }
+
+    .tool-link:hover {
+      border-color: #5c7380;
+      background: #eef4f7;
+      color: #1f2e38;
+      transform: translateY(-1px);
+    }
+
+    @media (max-width: 980px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .side-stack {
+        position: static;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .header-inner {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .header-score {
+        width: 100%;
+      }
+
+      .toolbar {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .actions {
+        justify-content: stretch;
+      }
+
+      .btn {
+        flex: 1 1 0;
+      }
+
+      .grid,
+      .grid.two,
+      .check-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .team-total {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 16px;
+      border-bottom: 1px solid #dbe7ed;
+      background: #fbfeff;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .team-total strong {
+      color: var(--amber);
+      font-size: 20px;
+    }
+
+    .detail-list li.note-item span {
+      color: var(--rose);
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="title-block">
+        <p class="eyebrow">集成战略 · 沉沦者的黑流树海 · n15</p>
+        <h1>节奏人杯 算分器</h1>
+        <p class="subtitle">！！！打完不要退出结算界面！！！</p>
+      </div>
+      <div class="header-score">
+        <span>个人最终得分</span>
+        <strong id="heroTotal">0</strong>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="toolbar">
+      <p class="formula">约定：n15；开局禁携褴褛；通过二层前可无条件重开一次；全队源石锭提取上限 300；四名队员须为舰长群一群群友且开局分队不重复</p>
+      <div class="actions">
+        <button class="btn primary" id="calcBtn" type="button">计算分数</button>
+        <button class="btn" id="copyBtn" type="button">复制明细</button>
+        <button class="btn" id="resetBtn" type="button">清空</button>
+      </div>
+    </div>
+
+    <div class="layout">
+      <div class="sections">
+        <section>
+          <div class="section-head">
+            <h2>结算基础分</h2>
+            <span>结算分 × 0.8、藏品、零件与褴褛</span>
+          </div>
+          <div class="section-body">
+            <div class="grid">
+              <label class="field">
+                <span>结算分 · 基础分 ×0.8</span>
+                <input id="settlementRaw" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+              </label>
+              <label class="field">
+                <span>结算页面藏品个数 · 每个 +5</span>
+                <input id="relicCount" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+              </label>
+              <label class="field">
+                <span>零件个数 · 每个 +2</span>
+                <input id="partsCount" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+              </label>
+              <label class="field">
+                <span>褴褛猫与褴褛狗 · 每个 +10</span>
+                <input id="ragPet" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+              </label>
+              <label class="field">
+                <span>其余褴褛 · 每个 +20</span>
+                <input id="ragOther" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+              </label>
+            </div>
+            <p class="note">开局禁止携带褴褛，可无限烧水开局；局内获得的褴褛按上表计分。</p>
+          </div>
+        </section>
+
+        <section>
+          <div class="section-head">
+            <h2>作战与结局</h2>
+            <span>三层 BOSS、击杀、临招与结局通关</span>
+          </div>
+          <div class="section-body">
+            <div class="group-title">三层与击杀</div>
+            <div class="check-grid">
+              <label class="check-pill">
+                <input type="checkbox" data-group="combat" data-score="100" data-label="通过三层BOSS战">
+                <span>通过三层BOSS战 <small>+100</small></span>
+              </label>
+              <label class="check-pill">
+                <input type="checkbox" data-group="combat" data-score="50" data-label="光荣远征中未能获得赤金">
+                <span>光荣远征未获赤金 <small>额外 +50</small></span>
+              </label>
+            </div>
+            <div class="grid">
+              <label class="field">
+                <span>熊、狗、鸭、鼠击杀 · 每只 +10</span>
+                <input id="beasts" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+              </label>
+            </div>
+
+            <div class="group-title">结局通关</div>
+            <div class="check-grid">
+              <label class="check-pill">
+                <input type="checkbox" data-group="combat" data-score="200" data-label="通关一结局">
+                <span>一结局 <small>+200</small></span>
+              </label>
+              <label class="check-pill">
+                <input type="checkbox" data-group="combat" data-score="250" data-label="通关二结局">
+                <span>二结局 <small>+250</small></span>
+              </label>
+              <label class="check-pill">
+                <input type="checkbox" data-group="combat" data-score="250" data-label="通关追猎一结局">
+                <span>追猎一结局 <small>+250</small></span>
+              </label>
+              <label class="check-pill">
+                <input type="checkbox" data-group="combat" data-score="500" data-label="通关三结局">
+                <span>三结局 <small>+500</small></span>
+              </label>
+              <label class="check-pill">
+                <input type="checkbox" data-group="combat" data-score="550" data-label="通关追猎三结局">
+                <span>追猎三结局 <small>+550</small></span>
+              </label>
+            </div>
+
+            <div class="group-title">临时招募</div>
+            <div class="grid">
+              <label class="field">
+                <span>临时招募六星干员 · 每个 +20</span>
+                <input id="temp6" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+              </label>
+              <label class="field">
+                <span>临时招募五星干员 · 每个 +10</span>
+                <input id="temp5" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+              </label>
+              <label class="field">
+                <span>临时招募四星干员 · 每个 +5</span>
+                <input id="temp4" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+              </label>
+            </div>
+            <div class="grid">
+              <label class="field">
+                <span>携带临招干员进入三结局 · 每个 +50（上限 200）</span>
+                <input id="tempEnding" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <div class="section-head">
+            <h2>限制与扣除</h2>
+            <span>干员抓取、板藤与海选限制</span>
+          </div>
+          <div class="section-body">
+            <div class="group-title">干员抓取限制（全队）</div>
+            <div class="grid">
+              <label class="field">
+                <span>六星（机械师除外）第三次抓取 · 每次 -500</span>
+                <input id="sixStarThird" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+              </label>
+              <label class="field">
+                <span>六星（机械师除外）第四次抓取 · 每次 -1000</span>
+                <input id="sixStarFourth" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+              </label>
+              <label class="field">
+                <span>暴雨/渡桥/乌啾额外抓取 · 每次 -500</span>
+                <input id="fiveStarExtra" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+              </label>
+            </div>
+            <p class="note">除机械师外的六星干员全队每人只可使用两次；暴雨、渡桥、乌啾三名五星全队仅可抓取两次。</p>
+
+            <div class="group-title">板藤</div>
+            <div class="grid">
+              <label class="field">
+                <span>板藤出售价值（元）· 超出 100 元每 1 元 -20</span>
+                <input id="vinePrice" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+              </label>
+            </div>
+            <p class="note">板藤价值上限为 100 元，按出售价值计算超出部分。</p>
+
+            <div class="group-title">海选赛限制</div>
+            <div class="check-grid">
+              <label class="check-pill">
+                <input type="checkbox" data-group="limit" data-score="-1000" data-label="海选赛误抓复得之轮/果腹">
+                <span>误抓复得之轮/果腹 <small>-1000</small></span>
+              </label>
+            </div>
+            <p class="note">海选赛阶段除强塞事件外不可抓取复得之轮与果腹，决赛不做限制。</p>
+          </div>
+        </section>
+
+        <section>
+          <div class="section-head">
+            <h2>位置、队伍与决赛</h2>
+            <span>位置系数、藏品要求、限时与全队项</span>
+          </div>
+          <div class="section-body">
+            <div class="group-title">参赛位置</div>
+            <div class="check-grid">
+              <label class="check-pill">
+                <input type="radio" name="role" value="normal" data-label="普通位" checked>
+                <span>普通位 <small>×1.0</small></span>
+              </label>
+              <label class="check-pill">
+                <input type="radio" name="role" value="pressure" data-label="抗压位">
+                <span>抗压位 <small>×1.3</small></span>
+              </label>
+            </div>
+            <p class="note">每队 3 名普通位与 1 名抗压位；抗压位强制全追猎，最终得分在个人分基础上 ×1.3。</p>
+
+            <div class="group-title">藏品要求（未满足则本局分数无效）</div>
+            <div class="check-grid">
+              <label class="check-pill">
+                <input id="sandboxOne" type="checkbox">
+                <span>至少携带一个沙盘 <small>普通位</small></span>
+              </label>
+              <label class="check-pill">
+                <input id="sandboxDouble" type="checkbox">
+                <span>携带双沙盘 <small>抗压位</small></span>
+              </label>
+              <label class="check-pill">
+                <input id="weakenThree" type="checkbox">
+                <span>携带三个削弱藏 <small>抗压位</small></span>
+              </label>
+              <label class="check-pill">
+                <input id="fullHunt" type="checkbox">
+                <span>全追猎（含 3/5 层 Boss） <small>合规要求</small></span>
+              </label>
+            </div>
+            <p class="note">普通位结算时至少携带一个沙盘；抗压位结算时应携带双沙盘与三个削弱藏，未按要求携带则本局分数无效。</p>
+
+            <div class="group-title">决赛限时</div>
+            <div class="grid two">
+              <label class="field">
+                <span>决赛探索时长（分钟，留空则不计限时）</span>
+                <input id="finalMinutes" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+              </label>
+              <div class="field">
+                <span>从计时器读取</span>
+                <button class="btn" id="timerFill" type="button">填入计时器分钟数</button>
+              </div>
+            </div>
+            <p class="note">仅决赛阶段适用：两小时内完成 +100 速通分；探索时长超过三个半小时，每超过一分钟 -50（分钟数向上取整）。</p>
+
+            <div class="group-title">全队项（计入团队总分）</div>
+            <div class="check-grid">
+              <label class="check-pill">
+                <input type="checkbox" data-group="team" data-score="-200" data-label="全队无人通关一结局">
+                <span>无人通关一结局 <small>-200</small></span>
+              </label>
+              <label class="check-pill">
+                <input type="checkbox" data-group="team" data-score="-300" data-label="全队无人通关二结局">
+                <span>无人通关二结局 <small>-300</small></span>
+              </label>
+              <label class="check-pill">
+                <input type="checkbox" data-group="team" data-score="-500" data-label="全队无人通关三结局">
+                <span>无人通关三结局 <small>-500</small></span>
+              </label>
+            </div>
+            <div class="grid two">
+              <label class="field">
+                <span>全队源石锭提取数量 · 超出 300 每 1 元 -50</span>
+                <input id="originium" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+              </label>
+            </div>
+            <p class="note">全队项作用于团队总分，不计入队员个人最终得分。</p>
+          </div>
+        </section>
+      </div>
+
+      <div class="side-stack">
+        <aside class="summary" aria-live="polite">
+          <div class="summary-main">
+            <span>个人最终得分</span>
+            <strong id="totalScore">0</strong>
+            <span id="scoreNote">个人分 0 · 系数 ×1</span>
+          </div>
+          <div class="breakdown">
+            <div class="score-box">
+              <span>结算基础分</span>
+              <strong id="baseScore">0</strong>
+            </div>
+            <div class="score-box">
+              <span>作战与结局分</span>
+              <strong id="combatScore">0</strong>
+            </div>
+            <div class="score-box">
+              <span>限制与扣除分</span>
+              <strong id="limitScore">0</strong>
+            </div>
+            <div class="score-box">
+              <span>决赛限时分</span>
+              <strong id="finalScore">0</strong>
+            </div>
+          </div>
+          <div class="team-total">
+            <span>全队项（计入团队总分）</span>
+            <strong id="teamScore">0</strong>
+          </div>
+          <div class="detail">
+            <h3>计分明细</h3>
+            <ul class="detail-list" id="detailList"></ul>
+            <p class="empty" id="emptyDetail">点击计算后显示已计入项目。</p>
+          </div>
+        </aside>
+
+        <section class="timer-panel" aria-label="计时器">
+          <div class="timer-title">计时器</div>
+          <div class="timer-display" id="timerDisplay">0:00</div>
+          <div class="timer-controls">
+            <button class="timer-btn timer-toggle" id="timerToggle" type="button" aria-label="开始或暂停计时"></button>
+            <button class="timer-btn timer-reset" id="timerReset" type="button" aria-label="复位计时"></button>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer class="app-footer">
+    <span>版本号：v1.0.0913</span>
+    <span>作者：DeepSeek-V4-Flash &amp; GPT-5.5 &amp; 阿能才不是受</span>
+    <a class="github-link" href="https://github.com/Programme404/RhythmCup" target="_blank" rel="noopener noreferrer" aria-label="GitHub 在线代码仓库">
+      <svg viewBox="0 0 16 16" aria-hidden="true">
+        <path d="M8 0C3.58 0 0 3.67 0 8.2c0 3.62 2.29 6.69 5.47 7.77.4.08.55-.18.55-.4v-1.53c-2.23.5-2.7-.98-2.7-.98-.36-.95-.89-1.2-.89-1.2-.73-.51.06-.5.06-.5.8.06 1.23.85 1.23.85.72 1.26 1.88.9 2.34.69.07-.54.28-.9.51-1.11-1.78-.21-3.64-.91-3.64-4.05 0-.9.31-1.63.82-2.2-.08-.21-.36-1.05.08-2.18 0 0 .67-.22 2.2.84A7.45 7.45 0 0 1 8 3.92c.68 0 1.36.09 2 .28 1.53-1.06 2.2-.84 2.2-.84.44 1.13.16 1.97.08 2.18.51.57.82 1.3.82 2.2 0 3.15-1.87 3.84-3.65 4.04.29.26.54.76.54 1.54v2.25c0 .22.15.48.55.4A8.08 8.08 0 0 0 16 8.2C16 3.67 12.42 0 8 0Z"/>
+      </svg>
+    </a>
+  </footer>
+
+  <div class="toast" id="toast">已复制</div>
+
+  <script>
+    const scoreState = {
+      total: 0,
+      personal: 0,
+      coefficient: 1,
+      invalid: false,
+      base: 0,
+      combat: 0,
+      limit: 0,
+      final: 0,
+      team: 0,
+      details: []
+    };
+
+    const formatScore = (value) => Number.isInteger(value) ? String(value) : value.toFixed(2).replace(/\.?0+$/, "");
+    const formatDelta = (value) => `${value > 0 ? "+" : ""}${formatScore(value)}`;
+
+    const num = (id) => {
+      const value = Number(document.getElementById(id).value);
+      return Number.isFinite(value) && value > 0 ? value : 0;
+    };
+
+    const addDetail = (state, group, label, score) => {
+      if (!score) return;
+      state[group] += score;
+      state.details.push({ group, label, score });
+    };
+
+    const addNote = (state, label) => {
+      state.details.push({ group: "note", label, score: 0 });
+    };
+
+    const groupName = {
+      note: "提示",
+      base: "结算基础分",
+      combat: "作战与结局分",
+      limit: "限制与扣除分",
+      final: "决赛限时分",
+      team: "全队项"
+    };
+
+    const groupOrder = {
+      note: 0,
+      base: 1,
+      combat: 2,
+      limit: 3,
+      final: 4,
+      team: 5
+    };
+
+    const sortedDetails = (details) => details
+      .map((item, index) => ({ ...item, index }))
+      .sort((a, b) => {
+        const groupCompare = groupOrder[a.group] - groupOrder[b.group];
+        return groupCompare || a.index - b.index;
+      });
+
+    let timerElapsedMs = 0;
+    let timerStartedAt = 0;
+    let timerInterval = null;
+
+    function formatTimer(ms) {
+      const totalSeconds = Math.floor(ms / 1000);
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      return `${minutes}:${String(seconds).padStart(2, "0")}`;
+    }
+
+    function renderTimer() {
+      document.getElementById("timerDisplay").textContent = formatTimer(timerElapsedMs);
+    }
+
+    function startTimer() {
+      timerStartedAt = Date.now() - timerElapsedMs;
+      timerInterval = window.setInterval(() => {
+        timerElapsedMs = Date.now() - timerStartedAt;
+        renderTimer();
+      }, 250);
+      document.getElementById("timerToggle").classList.add("is-running");
+    }
+
+    function pauseTimer() {
+      if (!timerInterval) return;
+      window.clearInterval(timerInterval);
+      timerInterval = null;
+      timerElapsedMs = Date.now() - timerStartedAt;
+      renderTimer();
+      document.getElementById("timerToggle").classList.remove("is-running");
+    }
+
+    function toggleTimer() {
+      if (timerInterval) {
+        pauseTimer();
+      } else {
+        startTimer();
+      }
+    }
+
+    function resetTimer() {
+      if (timerInterval) {
+        window.clearInterval(timerInterval);
+        timerInterval = null;
+      }
+      timerElapsedMs = 0;
+      timerStartedAt = 0;
+      document.getElementById("timerToggle").classList.remove("is-running");
+      renderTimer();
+    }
+
+    function calculate() {
+      const state = {
+        total: 0,
+        personal: 0,
+        coefficient: 1,
+        invalid: false,
+        base: 0,
+        combat: 0,
+        limit: 0,
+        final: 0,
+        team: 0,
+        details: []
+      };
+
+      const rawSettlement = num("settlementRaw");
+      addDetail(state, "base", `结算分 ${formatScore(rawSettlement)} × 0.8`, rawSettlement * 0.8);
+
+      const relicCount = num("relicCount");
+      addDetail(state, "base", `结算页面藏品 ${relicCount} 个 × 5`, relicCount * 5);
+
+      const partsCount = num("partsCount");
+      addDetail(state, "base", `零件 ${partsCount} 个 × 2`, partsCount * 2);
+
+      const ragPet = num("ragPet");
+      addDetail(state, "base", `褴褛猫/褴褛狗 ${ragPet} 个 × 10`, ragPet * 10);
+
+      const ragOther = num("ragOther");
+      addDetail(state, "base", `其余褴褛 ${ragOther} 个 × 20`, ragOther * 20);
+
+      document.querySelectorAll('input[type="checkbox"][data-group]').forEach((input) => {
+        if (!input.checked || input.disabled) return;
+        addDetail(state, input.dataset.group, input.dataset.label, Number(input.dataset.score));
+      });
+
+      const combatCounts = [
+        ["beasts", 10, "熊、狗、鸭、鼠击杀"],
+        ["temp6", 20, "临时招募六星干员"],
+        ["temp5", 10, "临时招募五星干员"],
+        ["temp4", 5, "临时招募四星干员"]
+      ];
+      combatCounts.forEach(([id, unit, label]) => {
+        const count = num(id);
+        addDetail(state, "combat", `${label} × ${count}`, count * unit);
+      });
+
+      const tempEnding = num("tempEnding");
+      if (tempEnding) {
+        addDetail(state, "combat", `携带临招干员进入三结局 × ${tempEnding}（每个 +50，上限 200）`, Math.min(tempEnding * 50, 200));
+      }
+
+      const limitCounts = [
+        ["sixStarThird", -500, "六星（机械师除外）第三次抓取"],
+        ["sixStarFourth", -1000, "六星（机械师除外）第四次抓取"],
+        ["fiveStarExtra", -500, "暴雨/渡桥/乌啾额外抓取"]
+      ];
+      limitCounts.forEach(([id, unit, label]) => {
+        const count = num(id);
+        addDetail(state, "limit", `${label} × ${count}`, count * unit);
+      });
+
+      const vinePrice = num("vinePrice");
+      if (vinePrice > 100) {
+        const over = vinePrice - 100;
+        addDetail(state, "limit", `板藤出售价值 ${formatScore(vinePrice)} 元，超出 ${formatScore(over)} 元 × -20`, over * -20);
+      }
+
+      const finalMinutes = num("finalMinutes");
+      if (finalMinutes > 0 && finalMinutes <= 120) {
+        addDetail(state, "final", `探索时长 ${formatScore(finalMinutes)} 分钟（两小时内）速通分`, 100);
+      }
+      if (finalMinutes > 210) {
+        const over = Math.ceil(finalMinutes - 210);
+        addDetail(state, "final", `探索时长 ${formatScore(finalMinutes)} 分钟，超时 ${over} 分钟 × -50`, over * -50);
+      }
+
+      const originium = num("originium");
+      if (originium > 300) {
+        const over = originium - 300;
+        addDetail(state, "team", `全队源石锭提取 ${formatScore(originium)}，超出 ${formatScore(over)} × -50`, over * -50);
+      }
+
+      const pressure = isPressureRole();
+      state.coefficient = pressure ? 1.3 : 1;
+
+      const hasSandbox = document.getElementById("sandboxOne").checked;
+      const hasDoubleSandbox = document.getElementById("sandboxDouble").checked;
+      const hasWeaken = document.getElementById("weakenThree").checked;
+      state.invalid = pressure ? !(hasDoubleSandbox && hasWeaken) : !hasSandbox;
+
+      state.personal = state.base + state.combat + state.limit + state.final;
+      state.total = state.invalid ? 0 : state.personal * state.coefficient;
+
+      if (state.invalid) {
+        addNote(state, pressure
+          ? "抗压位未携带双沙盘与三个削弱藏，按规则五本局分数无效"
+          : "普通位未携带沙盘，按规则五本局分数无效");
+      }
+
+      Object.assign(scoreState, state);
+      render(state);
+    }
+
+    function render(state) {
+      document.getElementById("heroTotal").textContent = formatScore(state.total);
+      document.getElementById("totalScore").textContent = formatScore(state.total);
+      document.getElementById("scoreNote").textContent = `个人分 ${formatScore(state.personal)} · 系数 ×${state.coefficient}${state.invalid ? " · 本局无效" : ""}`;
+      document.getElementById("baseScore").textContent = formatScore(state.base);
+      document.getElementById("combatScore").textContent = formatScore(state.combat);
+      document.getElementById("limitScore").textContent = formatScore(state.limit);
+      document.getElementById("finalScore").textContent = formatScore(state.final);
+      document.getElementById("teamScore").textContent = formatDelta(state.team);
+
+      const list = document.getElementById("detailList");
+      list.innerHTML = "";
+      document.getElementById("emptyDetail").hidden = state.details.length > 0;
+      sortedDetails(state.details).forEach((item) => {
+        const li = document.createElement("li");
+        const span = document.createElement("span");
+        const score = document.createElement("b");
+        span.textContent = `${groupName[item.group]} · ${item.label}`;
+        if (item.group === "note") {
+          li.classList.add("note-item");
+          score.textContent = "—";
+        } else {
+          score.textContent = formatDelta(item.score);
+        }
+        li.append(span, score);
+        list.append(li);
+      });
+    }
+
+    function resetAll() {
+      document.querySelectorAll("input").forEach((input) => {
+        if (input.type === "checkbox") input.checked = false;
+        if (input.type === "number") input.value = "";
+        if (input.type === "radio") input.checked = input.defaultChecked;
+      });
+      document.querySelectorAll("select").forEach((select) => {
+        select.selectedIndex = 0;
+      });
+      syncRequirementPills();
+      calculate();
+    }
+
+    async function copyDetails() {
+      calculate();
+      const lines = [
+        `节奏人杯 算分结果：个人最终得分 ${formatScore(scoreState.total)}`,
+        `个人分 ${formatScore(scoreState.personal)} × 位置系数 ${scoreState.coefficient}${scoreState.invalid ? "（本局无效，记 0）" : ""}`,
+        `结算基础分：${formatScore(scoreState.base)}`,
+        `作战与结局分：${formatScore(scoreState.combat)}`,
+        `限制与扣除分：${formatScore(scoreState.limit)}`,
+        `决赛限时分：${formatScore(scoreState.final)}`,
+        `全队项（团队总分）：${formatDelta(scoreState.team)}`
+      ];
+      if (scoreState.details.length) {
+        lines.push("", "计分明细：");
+        sortedDetails(scoreState.details).forEach((item) => {
+          const value = item.group === "note" ? "—" : formatDelta(item.score);
+          lines.push(`- ${groupName[item.group]} · ${item.label}：${value}`);
+        });
+      }
+      try {
+        await navigator.clipboard.writeText(lines.join("\n"));
+        showToast("已复制明细");
+      } catch {
+        showToast("浏览器未允许复制");
+      }
+    }
+
+    function showToast(text) {
+      const toast = document.getElementById("toast");
+      toast.textContent = text;
+      toast.classList.add("show");
+      window.clearTimeout(showToast.timer);
+      showToast.timer = window.setTimeout(() => toast.classList.remove("show"), 1800);
+    }
+
+    document.getElementById("calcBtn").addEventListener("click", calculate);
+    document.getElementById("copyBtn").addEventListener("click", copyDetails);
+    document.getElementById("resetBtn").addEventListener("click", resetAll);
+    document.getElementById("timerToggle").addEventListener("click", toggleTimer);
+    document.getElementById("timerReset").addEventListener("click", resetTimer);
+    document.getElementById("timerFill").addEventListener("click", () => {
+      document.getElementById("finalMinutes").value = String(Math.ceil(timerElapsedMs / 60000));
+      calculate();
+    });
+
+    const roleInputs = Array.from(document.querySelectorAll('input[name="role"]'));
+    const sandboxOne = document.getElementById("sandboxOne");
+    const sandboxDouble = document.getElementById("sandboxDouble");
+    const weakenThree = document.getElementById("weakenThree");
+
+    function isPressureRole() {
+      const role = document.querySelector('input[name="role"]:checked');
+      return !!role && role.value === "pressure";
+    }
+
+    function syncRequirementPills() {
+      const pressure = isPressureRole();
+      sandboxOne.disabled = pressure;
+      sandboxDouble.disabled = !pressure;
+      weakenThree.disabled = !pressure;
+      if (pressure) {
+        sandboxOne.checked = false;
+      } else {
+        sandboxDouble.checked = false;
+        weakenThree.checked = false;
+      }
+    }
+
+    roleInputs.forEach((input) => input.addEventListener("change", () => {
+      syncRequirementPills();
+      calculate();
+    }));
+
+    syncRequirementPills();
+    renderTimer();
+    calculate();
+  </script>
+</body>
+</html>
