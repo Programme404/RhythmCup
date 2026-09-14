@@ -1065,11 +1065,15 @@
             <div class="group-title">海选赛限制</div>
             <div class="check-grid">
               <label class="check-pill">
-                <input id="invalidPick" type="checkbox" data-group="limit" data-score="-1000" data-label="海选赛误抓复得之轮/果腹">
-                <span>误抓复得之轮/果腹 <small>-1000</small></span>
+                <input id="invalidPickRelic" type="checkbox" data-group="limit" data-score="-1000" data-label="海选赛误抓复得之轮">
+                <span>误抓复得之轮 <small>-1000</small></span>
+              </label>
+              <label class="check-pill">
+                <input id="invalidPickFull" type="checkbox" data-group="limit" data-score="-1000" data-label="海选赛误抓果腹">
+                <span>误抓果腹 <small>-1000</small></span>
               </label>
             </div>
-            <p class="note">海选赛阶段除强塞事件外不可抓取复得之轮与果腹，决赛不做限制。</p>
+            <p class="note">海选赛阶段除强塞事件外不可抓取复得之轮与果腹，决赛不做限制；每误抓一项 -1000，两项都误抓则为 -2000。</p>
           </div>
         </section>
 
@@ -1124,7 +1128,7 @@
   </main>
 
   <footer class="app-footer">
-    <span>版本号：v1.0.0913</span>
+    <span>版本号：v1.0.0914</span>
     <span>作者：DeepSeek-V4-Flash &amp; GPT-5.5 &amp; 阿能才不是受</span>
     <a class="github-link" href="https://github.com/Programme404/RhythmCup" target="_blank" rel="noopener noreferrer" aria-label="GitHub 在线代码仓库">
       <svg viewBox="0 0 16 16" aria-hidden="true">
@@ -1144,7 +1148,7 @@
     ];
 
     const MEMBER_NUMBER_IDS = ["settlementRaw", "relicCount", "partsCount", "ragPet", "ragOther", "beasts", "temp6", "temp5", "temp4", "tempEnding", "sixStarThird", "sixStarFourth", "fiveStarExtra", "vinePrice", "finalMinutes"];
-    const MEMBER_CHECK_IDS = ["bossThree", "expeditionGold", "ending1", "ending2", "huntEnding1", "ending3", "huntEnding3", "invalidPick", "sandboxOne", "sandboxDouble", "weakenThree", "fullHunt"];
+    const MEMBER_CHECK_IDS = ["bossThree", "expeditionGold", "ending1", "ending2", "huntEnding1", "ending3", "huntEnding3", "invalidPickRelic", "invalidPickFull", "sandboxOne", "sandboxDouble", "weakenThree", "fullHunt"];
 
     const formatScore = (value) => Number.isInteger(value) ? String(value) : value.toFixed(2).replace(/\.?0+$/, "");
     const formatDelta = (value) => `${value > 0 ? "+" : ""}${formatScore(value)}`;
@@ -1199,7 +1203,7 @@
       return { base: 0, combat: 0, limit: 0, final: 0, personal: 0, coefficient: 1, invalid: false, total: 0, details: [] };
     }
 
-    const SCORED_ITEMS = ["bossThree", "expeditionGold", "ending1", "ending2", "huntEnding1", "ending3", "huntEnding3", "invalidPick"].map((id) => {
+    const SCORED_ITEMS = ["bossThree", "expeditionGold", "ending1", "ending2", "huntEnding1", "ending3", "huntEnding3", "invalidPickRelic", "invalidPickFull"].map((id) => {
       const input = document.getElementById(id);
       return { id, group: input.dataset.group, score: Number(input.dataset.score), label: input.dataset.label };
     });
